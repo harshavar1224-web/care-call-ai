@@ -1,0 +1,18 @@
+id: doctor_on_leave
+name: Doctor On Leave Handling
+description: Caller insists on booking Dr. Ananya Sharma on tomorrow's date when she is on leave. Agent must explain leave and offer next working day.
+max_turns: 7
+persona:
+  name: Kavita Sundaram
+  phone: "+919822334455"
+  goal: Request Dr. Ananya Sharma specifically tomorrow.
+  patience: medium
+  style: polite
+db_fixture:
+  reset_to_seed: true
+assertions:
+  required_tools:
+    - check_availability
+  behavior_rubric:
+    no_hallucinated_slots: true
+    polite_recovery: true

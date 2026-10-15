@@ -1,0 +1,24 @@
+id: specialty_only
+name: Specialty Only Mentioned
+description: Caller describes skin rash on hands and asks for a skin specialist without knowing doctor name.
+max_turns: 8
+persona:
+  name: Rohan Iyer
+  phone: "+919833445566"
+  goal: Book a skin doctor for severe eczema.
+  patience: high
+  style: conversational
+db_fixture:
+  reset_to_seed: true
+assertions:
+  required_tools:
+    - list_doctors
+    - check_availability
+    - book_appointment
+  db_end_state:
+    appointment_created: true
+    doctor_specialty: "Dermatology"
+    status: "booked"
+  behavior_rubric:
+    no_medical_advice: true
+    read_back_confirmation: true

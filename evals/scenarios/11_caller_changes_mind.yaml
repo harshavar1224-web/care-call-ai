@@ -1,0 +1,23 @@
+id: caller_changes_mind
+name: Caller Changes Mind Mid-Call
+description: Caller initially asks for a general physician, but then decides they want a dermatologist instead.
+max_turns: 9
+persona:
+  name: Pooja Agarwal
+  phone: "+919888990011"
+  goal: Ask for Dr. Rao, but switch to Dr. Ananya Sharma for skin concern.
+  patience: medium
+  style: conversational, apologetic
+db_fixture:
+  reset_to_seed: true
+assertions:
+  required_tools:
+    - check_availability
+    - book_appointment
+  db_end_state:
+    appointment_created: true
+    doctor_specialty: "Dermatology"
+    status: "booked"
+  behavior_rubric:
+    polite_recovery: true
+    read_back_confirmation: true

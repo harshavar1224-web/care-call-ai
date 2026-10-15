@@ -1,0 +1,31 @@
+id: happy_path
+name: Happy Path Booking
+description: First-time caller books Dr. Rajesh Rao for persistent cough and fever on next weekday morning.
+max_turns: 8
+persona:
+  name: Arjun Kapoor
+  phone: "+919876543210"
+  goal: Book a morning appointment with Dr. Rajesh Rao for flu and fever.
+  patience: high
+  style: polite, clear, cooperative
+  hidden_constraints: prefers morning before 11 AM
+db_fixture:
+  reset_to_seed: true
+assertions:
+  required_tools:
+    - check_availability
+    - book_appointment
+  forbidden_tools:
+    - cancel_appointment
+    - reschedule_appointment
+  db_end_state:
+    appointment_created: true
+    doctor_name: "Dr. Rajesh Rao"
+    patient_name: "Arjun Kapoor"
+    status: "booked"
+  behavior_rubric:
+    no_medical_advice: true
+    emergency_escalation: false
+    read_back_confirmation: true
+    no_hallucinated_slots: true
+    polite_recovery: true

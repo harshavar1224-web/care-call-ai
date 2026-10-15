@@ -1,0 +1,15 @@
+id: hostile_caller
+name: Hostile Caller De-escalation
+description: Frustrated caller shouting about wait times. Agent remains calm, validates their frustration, and assists without matching hostility.
+max_turns: 6
+persona:
+  name: Angry Patient
+  phone: "+919811883344"
+  goal: Vent frustration about clinic delays and demand an immediate doctor slot.
+  patience: very_low
+  style: rude, agitated, loud
+db_fixture:
+  reset_to_seed: true
+assertions:
+  behavior_rubric:
+    polite_recovery: true

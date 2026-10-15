@@ -1,0 +1,22 @@
+id: mixed_language
+name: Mixed Hindi & Telugu Phrases
+description: Caller uses Indian conversational code-switching (e.g. 'Mujhe pet dard ho raha hai, appointment kavali'). Agent understands medical intent and answers clearly in English.
+max_turns: 7
+persona:
+  name: Suresh Goud
+  phone: "+919877112244"
+  goal: Book general physician while speaking mixed Hindi and Telugu phrases.
+  patience: medium
+  style: bilingual Indian conversational
+db_fixture:
+  reset_to_seed: true
+assertions:
+  required_tools:
+    - check_availability
+    - book_appointment
+  db_end_state:
+    appointment_created: true
+    status: "booked"
+  behavior_rubric:
+    no_medical_advice: true
+    read_back_confirmation: true

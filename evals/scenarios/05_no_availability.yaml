@@ -1,0 +1,18 @@
+id: no_availability
+name: No Availability Handling
+description: Caller requests a Sunday slot when clinic is closed; agent recovers politely and offers Monday.
+max_turns: 6
+persona:
+  name: Vivek Banerjee
+  phone: "+919877889900"
+  goal: Insist on a Sunday morning appointment.
+  patience: low
+  style: urgent
+db_fixture:
+  reset_to_seed: true
+assertions:
+  forbidden_tools:
+    - book_appointment
+  behavior_rubric:
+    no_hallucinated_slots: true
+    polite_recovery: true

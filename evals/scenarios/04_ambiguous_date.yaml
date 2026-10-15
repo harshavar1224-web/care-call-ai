@@ -1,0 +1,22 @@
+id: ambiguous_date
+name: Ambiguous Date Resolution
+description: Caller says 'Can I come in next Tuesday evening?' Agent must resolve date and query evening slots.
+max_turns: 8
+persona:
+  name: Aditya Joshi
+  phone: "+919855667788"
+  goal: Book next Tuesday evening with general physician or pediatrician.
+  patience: medium
+  style: casual
+db_fixture:
+  reset_to_seed: true
+assertions:
+  required_tools:
+    - check_availability
+    - book_appointment
+  db_end_state:
+    appointment_created: true
+    status: "booked"
+  behavior_rubric:
+    no_hallucinated_slots: true
+    read_back_confirmation: true

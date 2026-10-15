@@ -1,0 +1,20 @@
+id: cancel_appointment
+name: Cancel Existing Booking
+description: Caller provides valid confirmation code APT-7482 and matching phone +919876543210 to cancel their booking.
+max_turns: 6
+persona:
+  name: Arjun Kapoor
+  phone: "+919876543210"
+  goal: Cancel appointment APT-7482 due to work conflict.
+  patience: medium
+  style: decisive
+db_fixture:
+  reset_to_seed: true
+assertions:
+  required_tools:
+    - cancel_appointment
+  db_end_state:
+    confirmation_code: "APT-7482"
+    status: "cancelled"
+  behavior_rubric:
+    polite_recovery: true

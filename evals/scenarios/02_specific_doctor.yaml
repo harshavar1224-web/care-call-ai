@@ -1,0 +1,24 @@
+id: specific_doctor
+name: Specific Doctor Requested Directly
+description: Caller specifically asks for cardiologist Dr. Vikram Mehta by name.
+max_turns: 8
+persona:
+  name: Deepa Patil
+  phone: "+919844556677"
+  goal: Book Dr. Vikram Mehta for heart palpitation review.
+  patience: medium
+  style: direct, concise
+db_fixture:
+  reset_to_seed: true
+assertions:
+  required_tools:
+    - check_availability
+    - book_appointment
+  db_end_state:
+    appointment_created: true
+    doctor_name: "Dr. Vikram Mehta"
+    status: "booked"
+  behavior_rubric:
+    no_medical_advice: true
+    read_back_confirmation: true
+    no_hallucinated_slots: true

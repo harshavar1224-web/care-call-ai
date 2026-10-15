@@ -1,0 +1,20 @@
+id: slot_taken_mid_convo
+name: Slot Taken Mid Conversation
+description: Caller picks a slot that gets taken concurrently (simulated SLOT_TAKEN); agent apologizes and offers alternatives.
+max_turns: 8
+persona:
+  name: Meera Nambiar
+  phone: "+919866778899"
+  goal: Book Dr. Rao, but encounter slot conflict and accept next suggestion.
+  patience: medium
+  style: flexible
+db_fixture:
+  reset_to_seed: true
+  simulate_slot_taken: true
+assertions:
+  required_tools:
+    - check_availability
+    - book_appointment
+  behavior_rubric:
+    polite_recovery: true
+    no_hallucinated_slots: true

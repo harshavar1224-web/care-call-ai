@@ -1,0 +1,6 @@
+{
+  "name": "CareCall - Clinic Appointment Voice Agent",
+  "description": "Production clinic voice-agent booking system with Retell AI, exclusion-constraint double-booking protection, pure TypeScript availability engine, real-time live demo, and Gemini eval harness.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,18 @@
+id: past_date
+name: Past Date Request Rejection
+description: Caller asks to book a slot that has already occurred earlier in the week or morning.
+max_turns: 5
+persona:
+  name: Manish Reddy
+  phone: "+919899001122"
+  goal: Ask for yesterday or earlier this morning's 8:00 AM slot.
+  patience: low
+  style: confused
+db_fixture:
+  reset_to_seed: true
+assertions:
+  forbidden_tools:
+    - book_appointment
+  behavior_rubric:
+    no_hallucinated_slots: true
+    polite_recovery: true

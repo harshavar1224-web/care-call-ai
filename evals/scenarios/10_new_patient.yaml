@@ -1,0 +1,23 @@
+id: new_patient
+name: New Patient Registration
+description: Caller has never visited the clinic before and books their first appointment.
+max_turns: 8
+persona:
+  name: Ishaan Verma
+  phone: "+919711223399"
+  goal: Register and book a pediatric appointment for my child.
+  patience: high
+  style: patient, inquisitive
+db_fixture:
+  reset_to_seed: true
+assertions:
+  required_tools:
+    - check_availability
+    - book_appointment
+  db_end_state:
+    appointment_created: true
+    patient_name: "Ishaan Verma"
+    status: "booked"
+  behavior_rubric:
+    read_back_confirmation: true
+    no_medical_advice: true

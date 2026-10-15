@@ -1,0 +1,21 @@
+id: reschedule_appointment
+name: Reschedule Existing Booking
+description: Caller provides valid confirmation code APT-7482 and matching phone +919876543210 to reschedule to a future day.
+max_turns: 8
+persona:
+  name: Arjun Kapoor
+  phone: "+919876543210"
+  goal: Reschedule APT-7482 to next day afternoon.
+  patience: high
+  style: polite
+db_fixture:
+  reset_to_seed: true
+assertions:
+  required_tools:
+    - reschedule_appointment
+  db_end_state:
+    confirmation_code: "APT-7482"
+    status: "booked"
+  behavior_rubric:
+    read_back_confirmation: true
+    no_medical_advice: true

@@ -77,91 +77,23 @@ export interface AvailabilityOptions {
   maxSlots?: number; // default 5
 }
 
-/**
- * Format a Date object into local date and time components in a given timezone.
- */
-export function getZonedDateParts(date: Date, timezone: string = 'Asia/Kolkata') {
-  const formatter = new Intl.DateTimeFormat('en-US', {
-    timeZone: timezone,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false,
-    weekday: 'short',
-  });
+import {
+  CLINIC_TIMEZONE,
+  getZonedDateParts,
+  createUtcFromZoned,
+  formatHumanVoiceSlot,
+  addZonedDays,
+  getCurrentClinicDate,
+} from './utils/timezone';
 
-  const parts = formatter.formatToParts(date);
-  const partMap: Record<string, string> = {};
-  for (const part of parts) {
-    partMap[part.type] = part.value;
-  }
-
-  // weekday index 0 (Sun) to 6 (Sat)
-  const weekdayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  const weekday = weekdayNames.indexOf(partMap.weekday);
-
-  return {
-    year: parseInt(partMap.year, 10),
-    month: partMap.month,
-    day: partMap.day,
-    hour: parseInt(partMap.hour, 10),
-    minute: parseInt(partMap.minute, 10),
-    dateString: `${partMap.year}-${partMap.month}-${partMap.day}`,
-    weekday: weekday >= 0 ? weekday : 0,
-  };
-}
-
-/**
- * Construct a UTC Date from a local YYYY-MM-DD and HH:MM in a specific timezone.
- * Uses binary/offset approximation or standard Intl offsets.
- */
-export function createUtcFromZoned(
-  dateStr: string,
-  timeStr: string,
-  timezone: string = 'Asia/Kolkata'
-): Date {
-  // For Asia/Kolkata, UTC offset is fixed at +05:30 (no Daylight Saving Time).
-  // We compute dynamically using Intl to support any timezone cleanly.
-  const [year, month, day] = dateStr.split('-').map(Number);
-  const [hour, minute] = timeStr.split(':').map(Number);
-
-  // Initial naive UTC date
-  const naiveUtc = new Date(Date.UTC(year, month - 1, day, hour, minute, 0, 0));
-  
-  // Find timezone offset in minutes at that instant
-  const parts = getZonedDateParts(naiveUtc, timezone);
-  const zonedAsUtc = Date.UTC(
-    parts.year,
-    parseInt(parts.month, 10) - 1,
-    parseInt(parts.day, 10),
-    parts.hour,
-    parts.minute,
-    0
-  );
-
-  const offsetMs = zonedAsUtc - naiveUtc.getTime();
-  return new Date(naiveUtc.getTime() - offsetMs);
-}
-
-/**
- * Format a slot into human-spoken audio description.
- * E.g., "Thursday, October 15 at 10:00 AM"
- */
-export function formatHumanVoiceSlot(utcDate: Date, timezone: string = 'Asia/Kolkata'): string {
-  const formatter = new Intl.DateTimeFormat('en-US', {
-    timeZone: timezone,
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true,
-  });
-  return formatter.format(utcDate);
-}
+export {
+  CLINIC_TIMEZONE,
+  getZonedDateParts,
+  createUtcFromZoned,
+  formatHumanVoiceSlot,
+  addZonedDays,
+  getCurrentClinicDate,
+};
 
 /**
  * Parse time "HH:MM" into minutes since midnight.
@@ -181,15 +113,6 @@ function minutesToTime(minutes: number): string {
 }
 
 /**
- * Add days to YYYY-MM-DD string.
- */
-function addDays(dateStr: string, days: number): string {
-  const [y, m, d] = dateStr.split('-').map(Number);
-  const date = new Date(Date.UTC(y, m - 1, d + days));
-  return date.toISOString().slice(0, 10);
-}
-
-/**
  * Core pure TypeScript availability computation.
  */
 export function computeDoctorAvailability(options: AvailabilityOptions): AvailableSlot[] {
@@ -201,7 +124,7 @@ export function computeDoctorAvailability(options: AvailabilityOptions): Availab
     dateFrom,
     dateTo,
     partOfDay,
-    clinicTimezone = 'Asia/Kolkata',
+    clinicTimezone = CLINIC_TIMEZONE,
     now = new Date(),
     maxSlots = 5,
   } = options;
@@ -233,7 +156,7 @@ export function computeDoctorAvailability(options: AvailabilityOptions): Availab
 
     // If completely off, skip this entire day
     if (exception && exception.kind === 'off') {
-      currentDateStr = addDays(currentDateStr, 1);
+      currentDateStr = addZonedDays(currentDateStr, 1);
       continue;
     }
 
@@ -317,7 +240,7 @@ export function computeDoctorAvailability(options: AvailabilityOptions): Availab
       }
     }
 
-    currentDateStr = addDays(currentDateStr, 1);
+    currentDateStr = addZonedDays(currentDateStr, 1);
   }
 
   return availableSlots;

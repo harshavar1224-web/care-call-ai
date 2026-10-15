@@ -46,6 +46,9 @@ export interface Patient {
   clinicId: string;
   name: string;
   phone: string;
+  email?: string | null;
+  passwordHash?: string | null;
+  role: 'patient' | 'admin';
   createdAt: string;
 }
 

@@ -15,6 +15,7 @@ import {
 import { Orb, OrbState } from '../components/Orb';
 import { api } from '../api';
 import { RetellWebClient } from 'retell-client-js-sdk';
+import { formatClinicTimeOnly, CLINIC_TIMEZONE } from '../utils/timezone';
 
 interface TranscriptItem {
   id: string;
@@ -287,7 +288,7 @@ export const LiveDemo: React.FC = () => {
             id: `sim-${Date.now()}-${Math.random()}`,
             role: item.role,
             text: item.text,
-            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+            timestamp: formatClinicTimeOnly(new Date()),
           },
         ]);
         setOrbState(item.orb);
@@ -301,7 +302,7 @@ export const LiveDemo: React.FC = () => {
               toolName: item.tool!.name,
               detail: item.tool!.detail,
               latencyMs: item.tool!.latencyMs,
-              timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+              timestamp: formatClinicTimeOnly(new Date()),
               status: 'completed',
             },
           ]);
@@ -372,6 +373,10 @@ export const LiveDemo: React.FC = () => {
           <span className="text-xs text-slate-400">·</span>
           <span className="text-xs font-medium text-slate-600">
             {callActive ? (isSimulatedMode ? 'Simulator Active' : 'Live Retell WebCall') : 'Standby'}
+          </span>
+          <span className="text-xs text-slate-400">·</span>
+          <span className="text-[11px] font-mono text-teal-800 bg-teal-50 px-2 py-0.5 rounded border border-teal-200">
+            Asia/Kolkata (IST)
           </span>
         </div>
 

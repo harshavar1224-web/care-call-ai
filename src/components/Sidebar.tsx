@@ -5,6 +5,7 @@ import {
   Mic,
   CalendarDays,
   Users,
+  UserCheck,
   PhoneCall,
   CheckCircle2,
   Settings,
@@ -22,13 +23,14 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle, onLogout }) => {
   const navItems = [
-    { to: '/', label: 'Overview', icon: LayoutDashboard },
-    { to: '/live-demo', label: 'Live Demo', icon: Mic, highlight: true },
-    { to: '/schedule', label: 'Doctor Schedule', icon: CalendarDays },
-    { to: '/appointments', label: 'Appointments', icon: Users },
-    { to: '/calls', label: 'Call Transcripts', icon: PhoneCall },
-    { to: '/evals', label: 'Evaluations', icon: CheckCircle2 },
-    { to: '/settings', label: 'Settings', icon: Settings },
+    { to: '/admin', label: 'Overview', icon: LayoutDashboard },
+    { to: '/admin/live-demo', label: 'Live Demo', icon: Mic, highlight: true },
+    { to: '/admin/schedule', label: 'Doctor Schedule', icon: CalendarDays },
+    { to: '/admin/appointments', label: 'Appointments', icon: Users },
+    { to: '/admin/patients', label: 'Registered Patients', icon: UserCheck },
+    { to: '/admin/calls', label: 'Call Transcripts', icon: PhoneCall },
+    { to: '/admin/evals', label: 'Evaluations', icon: CheckCircle2 },
+    { to: '/admin/settings', label: 'Settings', icon: Settings },
   ];
 
   return (
@@ -46,7 +48,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle, onLogout 
           {!collapsed && (
             <div className="flex flex-col min-w-0">
               <span className="text-sm font-bold tracking-tight text-slate-900 truncate">
-                CareCall
+                CareCall Admin
               </span>
               <span className="text-[11px] text-slate-500 truncate">
                 CityCare Clinic
@@ -72,7 +74,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle, onLogout 
             <NavLink
               key={item.to}
               to={item.to}
-              end={item.to === '/'}
+              end={item.to === '/admin'}
               className={({ isActive }) =>
                 `flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-colors whitespace-nowrap ${
                   isActive

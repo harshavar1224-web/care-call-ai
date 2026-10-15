@@ -17,6 +17,7 @@ import { EvalRun, EvalResult } from '../types';
 import { TableSkeleton, CardSkeleton } from '../components/Skeleton';
 import { EmptyState } from '../components/EmptyState';
 import { ErrorState } from '../components/ErrorState';
+import { formatClinicDateTime } from '../utils/timezone';
 
 export const Evals: React.FC = () => {
   const [runs, setRuns] = useState<Array<{ run: EvalRun; results: EvalResult[] }>>([]);
@@ -149,14 +150,7 @@ export const Evals: React.FC = () => {
                 >
                   {runs.map((r) => (
                     <option key={r.run.id} value={r.run.id}>
-                      {new Intl.DateTimeFormat('en-US', {
-                        timeZone: 'Asia/Kolkata',
-                        month: 'short',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      }).format(new Date(r.run.createdAt))}{' '}
-                      — {r.run.passRate}% Pass
+                      {formatClinicDateTime(r.run.createdAt)} — {r.run.passRate}% Pass
                     </option>
                   ))}
                 </select>

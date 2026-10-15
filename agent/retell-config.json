@@ -63,11 +63,11 @@
           },
           "date_from": {
             "type": "string",
-            "description": "Start date in YYYY-MM-DD format"
+            "description": "Start date in YYYY-MM-DD format in clinic timezone (Asia/Kolkata)"
           },
           "date_to": {
             "type": "string",
-            "description": "End date in YYYY-MM-DD format"
+            "description": "End date in YYYY-MM-DD format in clinic timezone (Asia/Kolkata)"
           },
           "part_of_day": {
             "type": "string",

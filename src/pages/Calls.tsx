@@ -17,6 +17,7 @@ import { CallItem, ToolInvocation } from '../types';
 import { TableSkeleton } from '../components/Skeleton';
 import { EmptyState } from '../components/EmptyState';
 import { ErrorState } from '../components/ErrorState';
+import { formatClinicDateTime } from '../utils/timezone';
 
 export const Calls: React.FC = () => {
   const [calls, setCalls] = useState<CallItem[]>([]);
@@ -131,13 +132,7 @@ export const Calls: React.FC = () => {
                     <div className="flex items-center justify-between text-xs text-slate-500">
                       <div>{getOutcomeBadge(c)}</div>
                       <span className="text-[11px] text-slate-400">
-                        {new Intl.DateTimeFormat('en-US', {
-                          timeZone: 'Asia/Kolkata',
-                          month: 'short',
-                          day: 'numeric',
-                          hour: 'numeric',
-                          minute: '2-digit',
-                        }).format(new Date(c.startedAt || c.createdAt))}
+                        {formatClinicDateTime(c.startedAt || c.createdAt)}
                       </span>
                     </div>
                   </div>

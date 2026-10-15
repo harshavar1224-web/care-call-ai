@@ -16,6 +16,10 @@ import {
   computeDoctorAvailability,
   AvailableSlot,
   createUtcFromZoned,
+  getCurrentClinicDate,
+  getZonedDateParts,
+  addZonedDays,
+  CLINIC_TIMEZONE,
 } from '../availability';
 
 /**
@@ -223,13 +227,9 @@ export class CareCallRepository {
       { id: 'sch-des-6', doctorId: 'b0000000-0000-0000-0000-000000000006', weekday: 6, startTime: '09:30', endTime: '14:00', createdAt: new Date().toISOString() },
     ];
 
-    // 3 Schedule Exceptions relative to today
-    const today = new Date();
-    const getDateOffset = (days: number) => {
-      const d = new Date(today);
-      d.setDate(d.getDate() + days);
-      return d.toISOString().slice(0, 10);
-    };
+    // 3 Schedule Exceptions relative to today in the clinic's local timezone (Asia/Kolkata)
+    const todayClinicDate = getCurrentClinicDate(this.clinic.timezone);
+    const getDateOffset = (days: number) => addZonedDays(todayClinicDate, days);
 
     this.exceptions = [
       {
@@ -260,18 +260,31 @@ export class CareCallRepository {
       },
     ];
 
-    // 10 Patients
+    // Seed Admin and Patients with roles and password hashes
+    const adminPasswordHash = this.hashPassword(process.env.ADMIN_PASSWORD || 'clinic_admin_pass');
+    const defaultPatientPasswordHash = this.hashPassword('password123');
+
     this.patients = [
-      { id: 'c0000000-0000-0000-0000-000000000001', clinicId, name: 'Arjun Kapoor', phone: '+919876543210', createdAt: new Date().toISOString() },
-      { id: 'c0000000-0000-0000-0000-000000000002', clinicId, name: 'Neha Verma', phone: '+919811223344', createdAt: new Date().toISOString() },
-      { id: 'c0000000-0000-0000-0000-000000000003', clinicId, name: 'Kavita Sundaram', phone: '+919822334455', createdAt: new Date().toISOString() },
-      { id: 'c0000000-0000-0000-0000-000000000004', clinicId, name: 'Rohan Iyer', phone: '+919833445566', createdAt: new Date().toISOString() },
-      { id: 'c0000000-0000-0000-0000-000000000005', clinicId, name: 'Deepa Patil', phone: '+919844556677', createdAt: new Date().toISOString() },
-      { id: 'c0000000-0000-0000-0000-000000000006', clinicId, name: 'Aditya Joshi', phone: '+919855667788', createdAt: new Date().toISOString() },
-      { id: 'c0000000-0000-0000-0000-000000000007', clinicId, name: 'Meera Nambiar', phone: '+919866778899', createdAt: new Date().toISOString() },
-      { id: 'c0000000-0000-0000-0000-000000000008', clinicId, name: 'Vivek Banerjee', phone: '+919877889900', createdAt: new Date().toISOString() },
-      { id: 'c0000000-0000-0000-0000-000000000009', clinicId, name: 'Pooja Agarwal', phone: '+919888990011', createdAt: new Date().toISOString() },
-      { id: 'c0000000-0000-0000-0000-000000000010', clinicId, name: 'Manish Reddy', phone: '+919899001122', createdAt: new Date().toISOString() },
+      {
+        id: 'a0000000-0000-0000-0000-000000000099',
+        clinicId,
+        name: 'System Administrator',
+        phone: '+918000000000',
+        email: 'admin@citycare.clinic',
+        passwordHash: adminPasswordHash,
+        role: 'admin',
+        createdAt: new Date().toISOString(),
+      },
+      { id: 'c0000000-0000-0000-0000-000000000001', clinicId, name: 'Arjun Kapoor', phone: '+919876543210', email: 'arjun@example.com', passwordHash: defaultPatientPasswordHash, role: 'patient', createdAt: new Date().toISOString() },
+      { id: 'c0000000-0000-0000-0000-000000000002', clinicId, name: 'Neha Verma', phone: '+919811223344', email: 'neha@example.com', passwordHash: defaultPatientPasswordHash, role: 'patient', createdAt: new Date().toISOString() },
+      { id: 'c0000000-0000-0000-0000-000000000003', clinicId, name: 'Kavita Sundaram', phone: '+919822334455', email: 'kavita@example.com', passwordHash: defaultPatientPasswordHash, role: 'patient', createdAt: new Date().toISOString() },
+      { id: 'c0000000-0000-0000-0000-000000000004', clinicId, name: 'Rohan Iyer', phone: '+919833445566', email: 'rohan@example.com', passwordHash: defaultPatientPasswordHash, role: 'patient', createdAt: new Date().toISOString() },
+      { id: 'c0000000-0000-0000-0000-000000000005', clinicId, name: 'Deepa Patil', phone: '+919844556677', email: 'deepa@example.com', passwordHash: defaultPatientPasswordHash, role: 'patient', createdAt: new Date().toISOString() },
+      { id: 'c0000000-0000-0000-0000-000000000006', clinicId, name: 'Aditya Joshi', phone: '+919855667788', email: 'aditya@example.com', passwordHash: defaultPatientPasswordHash, role: 'patient', createdAt: new Date().toISOString() },
+      { id: 'c0000000-0000-0000-0000-000000000007', clinicId, name: 'Meera Nambiar', phone: '+919866778899', email: 'meera@example.com', passwordHash: defaultPatientPasswordHash, role: 'patient', createdAt: new Date().toISOString() },
+      { id: 'c0000000-0000-0000-0000-000000000008', clinicId, name: 'Vivek Banerjee', phone: '+919877889900', email: 'vivek@example.com', passwordHash: defaultPatientPasswordHash, role: 'patient', createdAt: new Date().toISOString() },
+      { id: 'c0000000-0000-0000-0000-000000000009', clinicId, name: 'Pooja Agarwal', phone: '+919888990011', email: 'pooja@example.com', passwordHash: defaultPatientPasswordHash, role: 'patient', createdAt: new Date().toISOString() },
+      { id: 'c0000000-0000-0000-0000-000000000010', clinicId, name: 'Manish Reddy', phone: '+919899001122', email: 'manish@example.com', passwordHash: defaultPatientPasswordHash, role: 'patient', createdAt: new Date().toISOString() },
     ];
 
     // Appointments across the next 2 weeks
@@ -432,8 +445,108 @@ export class CareCallRepository {
   }
 
   // ==========================================================================
-  // QUERY METHODS
+  // AUTHENTICATION & PATIENT / ADMIN METHODS
   // ==========================================================================
+
+  public hashPassword(password: string): string {
+    const salt = crypto.randomBytes(16).toString('hex');
+    const hash = crypto.scryptSync(password, salt, 64).toString('hex');
+    return `${salt}:${hash}`;
+  }
+
+  public verifyPassword(password: string, stored?: string | null): boolean {
+    if (!stored) return false;
+    const parts = stored.split(':');
+    if (parts.length !== 2) return false;
+    const [salt, key] = parts;
+    const hash = crypto.scryptSync(password, salt, 64).toString('hex');
+    try {
+      return crypto.timingSafeEqual(Buffer.from(hash, 'hex'), Buffer.from(key, 'hex'));
+    } catch {
+      return false;
+    }
+  }
+
+  public async registerPatient(params: {
+    name: string;
+    email: string;
+    phone: string;
+    password: string;
+  }): Promise<Patient> {
+    const { name, email, phone, password } = params;
+    if (!email || !password || !name || !phone) {
+      throw { code: 'VALIDATION_ERROR', message: 'All fields (name, email, phone, password) are required.' };
+    }
+    const cleanEmail = email.toLowerCase().trim();
+    const existingEmail = this.patients.find((p) => p.email?.toLowerCase() === cleanEmail);
+    if (existingEmail) {
+      throw { code: 'DUPLICATE_EMAIL', message: 'An account with this email address already exists.' };
+    }
+
+    const cleanPhone = phone.replace(/[\s-]/g, '');
+    const existingPhone = this.patients.find((p) => p.phone.replace(/[\s-]/g, '') === cleanPhone);
+    if (existingPhone) {
+      throw { code: 'DUPLICATE_PHONE', message: 'An account with this phone number already exists.' };
+    }
+
+    const passwordHash = this.hashPassword(password);
+    const newPatient: Patient = {
+      id: crypto.randomUUID(),
+      clinicId: this.clinic.id,
+      name,
+      phone,
+      email: cleanEmail,
+      passwordHash,
+      role: 'patient', // Strictly enforced as patient
+      createdAt: new Date().toISOString(),
+    };
+
+    this.patients.push(newPatient);
+    return newPatient;
+  }
+
+  public async authenticateUser(emailOrIdentifier: string, password: string): Promise<Patient | null> {
+    const query = emailOrIdentifier.toLowerCase().trim();
+    const patient = this.patients.find(
+      (p) =>
+        (p.email && p.email.toLowerCase() === query) ||
+        p.phone.replace(/[\s-]/g, '') === query.replace(/[\s-]/g, '')
+    );
+
+    if (!patient || !patient.passwordHash) {
+      return null;
+    }
+
+    const isValid = this.verifyPassword(password, patient.passwordHash);
+    if (!isValid) {
+      return null;
+    }
+
+    return patient;
+  }
+
+  public async getPatientById(id: string): Promise<Patient | null> {
+    return this.patients.find((p) => p.id === id) || null;
+  }
+
+  public async listAllPatients(): Promise<Patient[]> {
+    return this.patients;
+  }
+
+  public async getAppointmentsForPatient(patientId: string): Promise<Appointment[]> {
+    const appts = this.appointments.filter((a) => a.patientId === patientId);
+    return appts.map((a) => {
+      const doc = this.doctors.find((d) => d.id === a.doctorId);
+      const pat = this.patients.find((p) => p.id === a.patientId);
+      return {
+        ...a,
+        doctorName: doc ? doc.name : 'Unknown Doctor',
+        doctorSpecialty: doc ? doc.specialty : '',
+        patientName: pat ? pat.name : 'Unknown Patient',
+        patientPhone: pat ? pat.phone : '',
+      };
+    }).sort((a, b) => new Date(b.startsAt).getTime() - new Date(a.startsAt).getTime());
+  }
 
   public async getClinicInfo(): Promise<Clinic> {
     return this.clinic;
@@ -473,15 +586,16 @@ export class CareCallRepository {
       }
       return patient;
     }
-    patient = {
+    const newPatient: Patient = {
       id: crypto.randomUUID(),
       clinicId: this.clinic.id,
       name,
       phone,
+      role: 'patient',
       createdAt: new Date().toISOString(),
     };
-    this.patients.push(patient);
-    return patient;
+    this.patients.push(newPatient);
+    return newPatient;
   }
 
   public async checkAvailability(params: CheckAvailabilityParams): Promise<{
@@ -618,9 +732,9 @@ export class CareCallRepository {
       });
 
       if (hasConflict) {
-        // Find 3 alternative upcoming slots for the same doctor
-        const dateStr = startObj.toISOString().slice(0, 10);
-        const nextWeekDate = new Date(startObj.getTime() + 7 * 86400000).toISOString().slice(0, 10);
+        // Find 3 alternative upcoming slots for the same doctor in clinic timezone
+        const dateStr = getZonedDateParts(startObj, this.clinic.timezone).dateString;
+        const nextWeekDate = addZonedDays(dateStr, 7);
         const alternativeSlots = computeDoctorAvailability({
           doctor: {
             id: doctor.id,
@@ -781,6 +895,32 @@ export class CareCallRepository {
     }
 
     return { appointment, doctor: doctor!, patient };
+  }
+
+  public async cancelAppointmentById(appointmentId: string, reason?: string): Promise<Appointment> {
+    const appointment = this.appointments.find(
+      (a) => a.id === appointmentId || a.confirmationCode.toUpperCase() === appointmentId.toUpperCase()
+    );
+    if (!appointment) {
+      throw { code: 'NOT_FOUND', message: 'Appointment not found.' };
+    }
+    if (appointment.status === 'cancelled') {
+      throw { code: 'ALREADY_CANCELLED', message: 'Appointment is already cancelled.' };
+    }
+    appointment.status = 'cancelled';
+    appointment.cancelledAt = new Date().toISOString();
+    if (reason) {
+      appointment.reason = appointment.reason ? `${appointment.reason} (Cancelled: ${reason})` : `Cancelled: ${reason}`;
+    }
+    const doc = this.doctors.find((d) => d.id === appointment.doctorId);
+    const pat = this.patients.find((p) => p.id === appointment.patientId);
+    return {
+      ...appointment,
+      doctorName: doc ? doc.name : 'Unknown Doctor',
+      doctorSpecialty: doc ? doc.specialty : '',
+      patientName: pat ? pat.name : 'Unknown Patient',
+      patientPhone: pat ? pat.phone : '',
+    };
   }
 
   // ==========================================================================

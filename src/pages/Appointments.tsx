@@ -5,6 +5,7 @@ import { Appointment, Doctor } from '../types';
 import { TableSkeleton } from '../components/Skeleton';
 import { EmptyState } from '../components/EmptyState';
 import { ErrorState } from '../components/ErrorState';
+import { formatClinicDateTime } from '../utils/timezone';
 
 export const Appointments: React.FC = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -185,14 +186,7 @@ export const Appointments: React.FC = () => {
 
                     {/* Scheduled Slot */}
                     <td className="py-3.5 px-4 font-mono text-slate-700 tabular-nums">
-                      {new Intl.DateTimeFormat('en-US', {
-                        timeZone: 'Asia/Kolkata',
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric',
-                        hour: 'numeric',
-                        minute: '2-digit',
-                      }).format(new Date(apt.startsAt))}
+                      {formatClinicDateTime(apt.startsAt)}
                     </td>
 
                     {/* Status */}

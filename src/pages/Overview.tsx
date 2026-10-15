@@ -23,6 +23,7 @@ import { api } from '../api';
 import { OverviewData } from '../types';
 import { CardSkeleton, TableSkeleton } from '../components/Skeleton';
 import { ErrorState } from '../components/ErrorState';
+import { formatClinicDateTime, formatClinicTimeOnly } from '../utils/timezone';
 
 export const Overview: React.FC = () => {
   const [data, setData] = useState<OverviewData | null>(null);
@@ -195,13 +196,7 @@ export const Overview: React.FC = () => {
                   </div>
                   <div className="text-right shrink-0">
                     <div className="text-xs font-mono font-medium text-slate-900 tabular-nums">
-                      {new Intl.DateTimeFormat('en-US', {
-                        timeZone: 'Asia/Kolkata',
-                        month: 'short',
-                        day: 'numeric',
-                        hour: 'numeric',
-                        minute: '2-digit',
-                      }).format(new Date(apt.startsAt))}
+                      {formatClinicDateTime(apt.startsAt)}
                     </div>
                     <span className="text-[11px] font-mono text-teal-700">
                       {apt.confirmationCode}
@@ -216,7 +211,10 @@ export const Overview: React.FC = () => {
         {/* Recent Calls */}
         <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm flex flex-col">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-slate-900">Recent Voice Inquiries</h3>
+            <div>
+              <h3 className="text-sm font-semibold text-slate-900">Recent Voice Inquiries</h3>
+              <p className="text-[11px] text-slate-400">Timestamps in Asia/Kolkata (IST)</p>
+            </div>
             <Link to="/calls" className="text-xs text-teal-600 hover:text-teal-700 font-medium inline-flex items-center gap-1">
               <span>View Logs</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -239,11 +237,7 @@ export const Overview: React.FC = () => {
                   </div>
                   <div className="text-right shrink-0">
                     <span className="text-[11px] text-slate-400">
-                      {new Intl.DateTimeFormat('en-US', {
-                        timeZone: 'Asia/Kolkata',
-                        hour: 'numeric',
-                        minute: '2-digit',
-                      }).format(new Date(call.startedAt || call.createdAt))}
+                      {formatClinicTimeOnly(call.startedAt || call.createdAt)}
                     </span>
                   </div>
                 </div>

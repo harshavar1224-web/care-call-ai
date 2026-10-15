@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import crypto from 'crypto';
 import Retell from 'retell-sdk';
 import { repository } from '../db/repository';
+import { formatClinicDisplayDateTime, getCurrentClinicDate } from '../utils/timezone';
 
 export const retellRouter = Router();
 
@@ -143,11 +144,22 @@ retellRouter.post('/web-token', async (req: Request, res: Response) => {
       retellClient = new Retell({ apiKey });
     }
 
-    // Call Retell API to create a web call
+    const clinic = await repository.getClinicInfo();
+    const now = new Date();
+    const currentIstFormatted = formatClinicDisplayDateTime(now, clinic.timezone);
+    const currentDateStr = getCurrentClinicDate(clinic.timezone);
+
+    // Call Retell API to create a web call with dynamic timezone context
     const webCallResponse = await retellClient.call.createWebCall({
       agent_id: agentId,
       metadata: {
         source: 'carecall_dashboard_web_client',
+      },
+      retell_llm_dynamic_variables: {
+        clinic_name: clinic.name,
+        clinic_timezone: clinic.timezone,
+        clinic_time_ist: currentIstFormatted,
+        clinic_date_ist: currentDateStr,
       },
     });
 

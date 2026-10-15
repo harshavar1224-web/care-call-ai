@@ -13,6 +13,14 @@ import { api } from '../api';
 import { Doctor, DoctorSchedule, ScheduleException, Appointment } from '../types';
 import { CardSkeleton } from '../components/Skeleton';
 import { ErrorState } from '../components/ErrorState';
+import {
+  CLINIC_TIMEZONE,
+  createUtcFromZoned,
+  getZonedDateParts,
+  addZonedDays,
+  formatClinicDateTime,
+  getCurrentClinicDate,
+} from '../utils/timezone';
 
 export const Schedule: React.FC = () => {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
@@ -65,20 +73,20 @@ export const Schedule: React.FC = () => {
 
   // Generate 7 days starting from current Monday in Asia/Kolkata
   const getWeekDays = () => {
-    const today = new Date();
-    const currentDay = today.getDay(); // 0=Sun .. 6=Sat
+    const todayClinicParts = getZonedDateParts(new Date(), CLINIC_TIMEZONE);
+    const currentWeekday = todayClinicParts.weekday; // 0=Sun .. 6=Sat
     // Find distance to Monday (1)
-    const distanceToMon = currentDay === 0 ? -6 : 1 - currentDay;
+    const distanceToMon = currentWeekday === 0 ? -6 : 1 - currentWeekday;
 
     const days: Array<{ dateStr: string; dayName: string; dayNum: string; weekday: number }> = [];
     for (let i = 0; i < 7; i++) {
-      const d = new Date(today);
-      d.setDate(today.getDate() + distanceToMon + i);
+      const targetDateStr = addZonedDays(todayClinicParts.dateString, distanceToMon + i);
+      const targetDateObj = createUtcFromZoned(targetDateStr, '12:00', CLINIC_TIMEZONE);
       days.push({
-        dateStr: d.toISOString().slice(0, 10),
-        dayName: new Intl.DateTimeFormat('en-US', { weekday: 'short' }).format(d),
-        dayNum: new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(d),
-        weekday: d.getDay(),
+        dateStr: targetDateStr,
+        dayName: new Intl.DateTimeFormat('en-US', { timeZone: CLINIC_TIMEZONE, weekday: 'short' }).format(targetDateObj),
+        dayNum: new Intl.DateTimeFormat('en-US', { timeZone: CLINIC_TIMEZONE, month: 'short', day: 'numeric' }).format(targetDateObj),
+        weekday: (1 + i) % 7, // Mon=1 .. Sat=6, Sun=0
       });
     }
     return days;
@@ -87,11 +95,9 @@ export const Schedule: React.FC = () => {
   const weekDays = getWeekDays();
 
   const handleSlotClick = (dateStr: string, timeStr: string) => {
-    // Construct ISO UTC startsAt
-    const [h, m] = timeStr.split(':').map(Number);
-    // Approximation for Asia/Kolkata (+05:30)
-    const naiveUtc = new Date(`${dateStr}T${timeStr}:00+05:30`);
-    setSelectedSlotTime(naiveUtc.toISOString());
+    // Construct exact UTC instant from clinic-local date and time in Asia/Kolkata
+    const utcDate = createUtcFromZoned(dateStr, timeStr, CLINIC_TIMEZONE);
+    setSelectedSlotTime(utcDate.toISOString());
     setBookingError(null);
     setAlternativeSlots([]);
     setPatientName('');
@@ -280,9 +286,8 @@ export const Schedule: React.FC = () => {
                 // Find booked appointment at this exact slot
                 const appointmentAtSlot = appointments.find((a) => {
                   if (a.doctorId !== activeDoctor.id || a.status !== 'booked') return false;
-                  const aptDateStr = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(new Date(a.startsAt));
-                  const aptTimeStr = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit' }).format(new Date(a.startsAt));
-                  return aptDateStr === day.dateStr && aptTimeStr === timeStr;
+                  const aptParts = getZonedDateParts(new Date(a.startsAt), CLINIC_TIMEZONE);
+                  return aptParts.dateString === day.dateStr && aptParts.timeString === timeStr;
                 });
 
                 if (isLeaveDay) {
@@ -389,13 +394,15 @@ export const Schedule: React.FC = () => {
 
             <form onSubmit={handleManualBook} className="space-y-3.5 text-xs">
               <div>
-                <label className="block font-medium text-slate-700 mb-1">Target Time (UTC)</label>
-                <input
-                  type="text"
-                  disabled
-                  value={selectedSlotTime}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-500 font-mono text-xs"
-                />
+                <label className="block font-medium text-slate-700 mb-1">
+                  Selected Slot Time (Asia/Kolkata)
+                </label>
+                <div className="w-full px-3 py-2 bg-teal-50 border border-teal-200 rounded-lg text-teal-900 font-medium text-xs flex flex-col gap-0.5">
+                  <span className="font-semibold">{selectedSlotTime ? formatClinicDateTime(selectedSlotTime) : '—'}</span>
+                  <span className="text-[10px] font-mono text-slate-500">
+                    UTC Timestamp: {selectedSlotTime}
+                  </span>
+                </div>
               </div>
 
               <div>
